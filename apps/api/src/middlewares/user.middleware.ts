@@ -6,7 +6,7 @@ import {
   sendResponse,
 } from '@packages/httputils';
 import { verifyJwt } from '@/services/authServices/auth.service';
-import env from '@/env';
+import env from '@packages/env';
 import userService from '@/services/authServices/user.service';
 
 declare global {
@@ -38,7 +38,7 @@ export const validateUser = asyncHandler(
     const payload = decoded.decoded as MyJwtPayload;
     const userId = payload.id;
 
-    logger('INFO', 'User ID extracted', userId);
+    // logger('INFO', 'User ID extracted', userId);
 
     const existingUser = await userService.findUser({ id: userId });
 
@@ -48,5 +48,5 @@ export const validateUser = asyncHandler(
 
     req.user = existingUser;
     return next();
-  }
+  },
 );

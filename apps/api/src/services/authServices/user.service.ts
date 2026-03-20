@@ -16,15 +16,23 @@ export const createUser = async (user: userSchema) => {
 type FindUserCriteria = {
   id?: string;
   email?: string;
+  password?: string;
 };
 
-export const findUser = async ({ id, email }: FindUserCriteria) => {
+export const findUser = async ({ id, email, password }: FindUserCriteria) => {
   let user = null;
+  let query: any = {};
   if (email) {
-    user = await User.findOne({ email }).select('+password');
-  } else if (id) {
-    user = await User.findById(id);
+    query.email = email;
   }
+  if (id) {
+    query._id = id;
+  }
+  if (password) {
+    query.password = password;
+  }
+
+  user = await User.findOne(query).select('+password');
   return user;
 };
 

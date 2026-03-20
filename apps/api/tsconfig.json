@@ -3,13 +3,13 @@
   "compilerOptions": {
     "jsx": "react",
     "module": "commonjs",
-    "rootDir": "./src",
     "outDir": "./dist",
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     }
+    
   },
-  "include": ["src"],
+  "include": ["src", "../../packages/env/env.ts"],
   "exclude": ["node_modules", "dist"]
 }

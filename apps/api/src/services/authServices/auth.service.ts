@@ -1,15 +1,19 @@
 import crypto from 'crypto';
-import env from '@/env';
+import env from '@packages/env';
 import { logger } from '@packages/httputils';
 import { ResetPassword } from '@/models/authModels/resetPassword.model';
 import User from '@/models/authModels/user.model';
 import jwt from 'jsonwebtoken';
-import {  verifyUserDocument,verifyUser, VerificationType} from '@/models/authModels/verifyUser.model';
+import {
+  verifyUserDocument,
+  verifyUser,
+  VerificationType,
+} from '@/models/authModels/verifyUser.model';
 
 export const signJwt = async (
   payload: Object,
   jwt_secret: string,
-  options: Object
+  options: Object,
 ) => {
   const token = jwt.sign(payload, jwt_secret, options);
   return token;
@@ -31,7 +35,7 @@ export const findandreissueToken = async (email: string) => {
     const token = await signJwt(
       { id: user?._id.toString() },
       env.ACCESS_SECRET,
-      { expiresIn: env.ACCESS_SECRET_TTL }
+      { expiresIn: env.ACCESS_SECRET_TTL },
     );
     logger('INFO', 'Access_Ttl:', env.ACCESS_SECRET_TTL);
     user.access_token = token;
@@ -50,13 +54,15 @@ export const extractUser = async (token: string) => {
   return userId;
 };
 
-
-export const generateOTP = async (email: string, verification_type:VerificationType) => {
+export const generateOTP = async (
+  email: string,
+  verification_type: VerificationType,
+) => {
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   await verifyUser.create({
     email,
     otp,
-    verification_type
+    verification_type,
   });
   return otp;
 };

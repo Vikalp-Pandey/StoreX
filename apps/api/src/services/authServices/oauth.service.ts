@@ -1,4 +1,4 @@
-import env from '@/env';
+import env from '@packages/env';
 import { accountType } from '@/models/authModels/user.model';
 import axios from 'axios';
 
@@ -24,7 +24,7 @@ const signinwithGithub = async (code: string) => {
     },
     {
       headers: { Accept: 'application/json' },
-    }
+    },
   );
   const access_token = tokenResponse.data.access_token;
   // logger("INFO","Access Token: ",access_token)
@@ -44,7 +44,7 @@ const signinwithGithub = async (code: string) => {
   // logger("INFO","Email Response",emailResponse);
 
   const email = emailResponse.data.find(
-    (email: any) => email.primary && email.verified
+    (email: any) => email.primary && email.verified,
   ).email;
 
   // Access Token is not of authorization Purpose here, use here because accessToken use is primarly for
@@ -53,7 +53,7 @@ const signinwithGithub = async (code: string) => {
     email: email,
     accountType: accountType.Github,
     accessToken: access_token,
-    twoFactorEnabled:false
+    twoFactorEnabled: false,
   };
 
   return userData;
@@ -90,7 +90,7 @@ const signinwithGoogle = async (code: string) => {
       headers: {
         'Content-Type': 'application/json',
       },
-    }
+    },
   );
   const token = tokenResponse.data;
   //    logger("INFO","token object",token)
@@ -101,7 +101,7 @@ const signinwithGoogle = async (code: string) => {
       headers: {
         Authorization: `Bearer ${token.access_token}`,
       },
-    }
+    },
   );
   const user = userResponse.data;
   return {
@@ -109,7 +109,7 @@ const signinwithGoogle = async (code: string) => {
     email: user.email,
     picture: user.picture,
     accountType: accountType.Google,
-    twoFactorEnabled:false
+    twoFactorEnabled: false,
   };
 };
 const oauthService = {

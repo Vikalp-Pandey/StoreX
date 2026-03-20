@@ -8,12 +8,17 @@
     "build": "tsc"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1004.0",
+    "@packages/env": "workspace:*",
     "@services/emailservices": "workspace:*",
     "@services/fileupload": "workspace:*",
+    "@types/cookie-parser": "^1.4.10",
+    "@types/cors": "^2.8.19",
     "@types/qrcode": "^1.5.6",
     "@types/speakeasy": "^2.0.10",
     "axios": "^1.13.6",
     "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",

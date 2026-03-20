@@ -1,6 +1,6 @@
 import { model, Document, Schema } from 'mongoose';
 import bcrypt from 'bcryptjs';
-import env from '@/env';
+import env from '@packages/env';
 
 export enum accountType {
   Github = 'Github',
@@ -15,6 +15,7 @@ export interface userSchema {
   password?: string;
   accountType: accountType;
   picture?: string;
+  emailVerified?: boolean;
   twoFactorEnabled: boolean;
   twoFactorSecret?: string;
 }
@@ -47,20 +48,23 @@ const userSchema = new Schema<userInput>(
     },
     access_token: {
       type: String,
-      expires: env.ACCESS_SECRET_TTL,
+      expires: 7 * 24 * 60 * 60,
     },
-      twoFactorEnabled: {
+    emailVerified: {
+      type: String,
+    },
+
+    twoFactorEnabled: {
       type: Boolean,
-      default: false
+      default: false,
     },
 
     twoFactorSecret: {
       type: String,
-      select: false
-    }
-  
+      select: false,
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Pre Method for Hashing Password

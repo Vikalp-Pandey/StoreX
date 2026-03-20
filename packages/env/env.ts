@@ -1,7 +1,8 @@
 import { z } from 'zod';
 import dotenv from 'dotenv';
 
-dotenv.config({ path: '.env.local', quiet: true });
+dotenv.config({ path: '../../packages/env/.env.local', quiet: true });
+
 const envSchema = z.object({
   // Node Environment
   NODE_ENV: z
@@ -30,7 +31,6 @@ const envSchema = z.object({
   ACCESS_SECRET_TTL_S: z.string(),
 
   // SMTP Configuration
-
   SMTP_NAME: z.string(),
   SMTP_MAIL: z.string(),
   SMTP_REPLY_TO: z.string(),
@@ -43,11 +43,11 @@ const envSchema = z.object({
   SMTP_PASSWORD: z.string(),
 
   // Aws S3 Credentials
-  AWS_REGION :z.string(),
+  AWS_REGION: z.string(),
   AWS_ACCESS_KEY_ID: z.string(),
-  AWS_SECRET_ACCESS_KEY :z.string(),
-  BUCKET_NAME:z.string(),
-  
+  AWS_SECRET_ACCESS_KEY: z.string(),
+  BUCKET_NAME: z.string(),
+
   // Github OAuth Credentials
   GITHUB_CLIENT_ID: z.string(),
   GITHUB_CLIENT_SECRET: z.string(),

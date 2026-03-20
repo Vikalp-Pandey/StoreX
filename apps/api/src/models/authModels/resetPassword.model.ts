@@ -22,5 +22,5 @@ export const resetpasswordSchema = new Schema<ResetPassword>({
 
 export const ResetPassword = model<ResetPassword>(
   'ResetPassword',
-  resetpasswordSchema
+  resetpasswordSchema,
 );

@@ -22,7 +22,7 @@ export class EmailService {
     host: string,
     port: number,
     username: string,
-    password: string
+    password: string,
   ) {
     this.transporter = createTransport({
       host,

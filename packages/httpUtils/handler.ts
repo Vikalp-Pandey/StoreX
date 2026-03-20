@@ -1,10 +1,9 @@
-
 import { Request, Response, NextFunction, CookieOptions } from 'express';
 
 type handlerFn = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => any | Promise<any> | Promise<void>;
 
 export const asyncHandler = (fn: handlerFn, finallyBlock?: any) => {
@@ -30,7 +29,7 @@ export const sendResponse = (
   res: Response,
   statusCode: number,
   detail?: string,
-  data?: Record<string, any>
+  data?: Record<string, any>,
 ) => {
   if (detail) {
     return res.status(statusCode).json({
@@ -55,7 +54,7 @@ interface RedirectOptions {
 export const sendRedirect = (
   res: Response,
   url: string,
-  options?: RedirectOptions
+  options?: RedirectOptions,
 ) => {
   const statusCode = options?.statusCode || 302;
 
@@ -65,7 +64,7 @@ export const sendRedirect = (
   // Check if options or queryparams exists or not
   if (options?.queryParams) {
     const params = new URLSearchParams(
-      options.queryParams as Record<string, string>
+      options.queryParams as Record<string, string>,
     ).toString();
 
     redirectUrl += url.includes('?') ? `&${params}` : `?${params}`;
@@ -73,7 +72,6 @@ export const sendRedirect = (
 
   return res.redirect(statusCode, redirectUrl);
 };
-
 
 // }
 export interface CookieConfig {
@@ -86,7 +84,7 @@ export const sendCookie = (
   label: string,
   token: string,
   config: CookieConfig, // Pass the environment-specific logic here
-  options: CookieOptions = {}
+  options: CookieOptions = {},
 ) => {
   res.cookie(label, token, {
     httpOnly: true,
@@ -100,7 +98,7 @@ export const sendCookie = (
 export const logger = (
   messageInfo: 'INFO' | 'ERROR',
   detail: string,
-  message?: unknown
+  message?: unknown,
 ) => {
   console.log(`${messageInfo}: ${detail}`);
   if (message) {
@@ -115,6 +113,5 @@ export class ApiError extends Error {
     super(message);
     this.statusCode = statusCode;
     Error.captureStackTrace(this, this.constructor);
-
   }
 }
