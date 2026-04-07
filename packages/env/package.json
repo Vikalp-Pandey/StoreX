@@ -6,6 +6,10 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "exports":{
+    ".":"./env.ts",
+    "./fenv":"./fenv.ts"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",

@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useUser } from '@/hooks/useAuth';
 import { useFiles } from '@/hooks/useFileUpload';
 import FileUpload from '@/components/upload/fileupload';
+import ShareDialog from '@/components/share/share-dialog';
 import { downloadFileBlob } from '@/api/fileupload.api';
 import {
   Database,
@@ -16,17 +17,20 @@ import {
   Trash2,
   Edit3,
   ChevronRight,
-  HardDrive,
   Eye,
+  Share2,
+  Users,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
+import { useSharedWithMe } from '@/hooks/useShare';
 
 export default function DashboardPage() {
   const { data: userData, isLoading: userLoading } = useUser();
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
-
-  // States
+  const { data: sharedItemsData, isLoading: sharedLoading } = useSharedWithMe();
+  const { fetchItems, folderCreate, fileDelete, folderDelete } =
+    useFiles(currentFolderId);
   const [items, setItems] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [pathStack, setPathStack] = useState([{ id: null, name: 'Root' }]);
@@ -34,11 +38,12 @@ export default function DashboardPage() {
   const [editValue, setEditValue] = useState('');
   const [draft, setDraft] = useState<any>(null);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
+  const [shareTarget, setShareTarget] = useState<{
+    id: string;
+    name: string;
+    type: 'file' | 'folder';
+  } | null>(null);
 
-  const { fetchItems, folderCreate, fileDelete, folderDelete } =
-    useFiles(currentFolderId);
-
-  // Sync server data to local state
   useEffect(() => {
     if (fetchItems.data) {
       setItems(fetchItems.data);
@@ -46,25 +51,78 @@ export default function DashboardPage() {
   }, [fetchItems.data]);
 
   const resolveItemName = (item: any) =>
-    item.itemName || item.name || 'Untitled_Asset';
+    item!.itemName || item!.name || 'Untitled_Asset';
 
-  // Data Filtering
-  const filesToRender = useMemo(() => {
-    let list = [...items];
-    if (draft && draft.parentId === currentFolderId) {
-      if (!list.find((i) => (i._id || i.id) === draft.id))
-        list = [draft, ...list];
+  const findNestedSharedFolder = (folders: any[], targetId: string): any => {
+    for (const folder of folders) {
+      if (folder._id === targetId) return folder;
+      if (folder.folders && folder.folders.length > 0) {
+        const found = findNestedSharedFolder(folder.folders, targetId);
+        if (found) return found;
+      }
     }
-    return list.filter((item) =>
+    return null;
+  };
+
+  const filesToRender = useMemo(() => {
+    // 1. Start with personal items
+    let combinedList = [...items];
+
+    // 2. Add Shared Items logic
+    if (sharedItemsData) {
+      if (currentFolderId === null) {
+        // At Root level, unwrap the 'item' property
+        const formattedShared = sharedItemsData.map((share: any) => ({
+          ...share.item, // Spread the folder/file details (id, name, folders, files)
+          isShared: true,
+          sharedBy: share.sharedBy,
+          permissions: share.permissions,
+          itemType: share.itemType,
+        }));
+        combinedList = [...combinedList, ...formattedShared];
+      } else {
+        // Find the folder inside the nested shared tree
+        const sharedFolder = findNestedSharedFolder(
+          sharedItemsData,
+          currentFolderId,
+        );
+
+        if (sharedFolder) {
+          // If the shared folder was found, it might be nested inside another share.item
+          // Extract its contents
+          const nestedFolders = (sharedFolder.folders || []).map((f: any) => ({
+            ...f,
+            isShared: true,
+            itemType: 'folder',
+          }));
+          const nestedFiles = (sharedFolder.files || []).map((f: any) => ({
+            ...f,
+            isShared: true,
+            itemType: 'file',
+          }));
+
+          combinedList = [...combinedList, ...nestedFolders, ...nestedFiles];
+        }
+      }
+    }
+
+    // 3. Handle Drafts
+    if (draft && draft.parentId === currentFolderId) {
+      if (!combinedList.find((i) => (i._id || i.id) === draft.id))
+        combinedList = [draft, ...combinedList];
+    }
+
+    // 4. Final Search Filter
+    return combinedList.filter((item) =>
       resolveItemName(item).toLowerCase().includes(searchQuery.toLowerCase()),
     );
-  }, [items, draft, searchQuery, currentFolderId]);
+  }, [items, sharedItemsData, draft, searchQuery, currentFolderId]);
 
-  // Handlers
   const handleItemClick = (item: any) => {
     const itemId = item._id || item.id;
     if (editingId === itemId || item.isDraft) return;
-    const isFolder = !item.fileUrl && !item.key;
+
+    const isFolder = item.itemType === 'folder' || (!item.fileUrl && !item.key);
 
     if (isFolder) {
       setPathStack((prev) => [
@@ -82,21 +140,16 @@ export default function DashboardPage() {
 
   const handleDownload = async (e: React.MouseEvent, item: any) => {
     e.stopPropagation();
-    const isFolder = !item.fileUrl && !item.key;
     const itemName = resolveItemName(item);
-
-    if (isFolder) {
-      toast.info(`${itemName} is empty.`);
+    if (!item.fileUrl) {
+      toast.info(`${itemName} is a directory.`);
       return;
     }
-
-    if (item.fileUrl) {
-      try {
-        await downloadFileBlob(item.fileUrl, itemName);
-        toast.success(`${itemName} downloaded successfully`);
-      } catch (err) {
-        toast.error('Download failed. Check CORS settings.');
-      }
+    try {
+      await downloadFileBlob(item.fileUrl, itemName);
+      toast.success(`${itemName} downloaded`);
+    } catch (err) {
+      toast.error('Download failed.');
     }
     setActiveMenu(null);
   };
@@ -116,7 +169,7 @@ export default function DashboardPage() {
             setEditingId(null);
             setDraft(null);
             setEditValue('');
-            toast.success('Folder created successfully');
+            toast.success('Folder created');
           },
         },
       );
@@ -129,18 +182,17 @@ export default function DashboardPage() {
         ),
       );
       setEditingId(null);
-      toast.info('Label updated locally');
+      toast.info('Update pending server sync');
     }
   };
 
   const handleDelete = (e: React.MouseEvent, item: any) => {
     e.stopPropagation();
     const itemId = item._id || item.id;
-    if (!window.confirm('Purge this data node?')) return;
+    if (!window.confirm('Delete this item?')) return;
     setActiveMenu(null);
 
     const isFolder = !item.fileUrl && !item.key;
-
     if (isFolder) {
       folderDelete.mutate({
         folderId: itemId,
@@ -248,7 +300,8 @@ export default function DashboardPage() {
             </div>
 
             <div className="flex-1 overflow-y-auto p-6 space-y-3 custom-scrollbar">
-              {fetchItems.isFetching && !fetchItems.isPlaceholderData ? (
+              {(fetchItems.isFetching || sharedLoading) &&
+              !fetchItems.isPlaceholderData ? (
                 <div className="h-full flex flex-col items-center justify-center opacity-30">
                   <Loader2 className="animate-spin text-sky-500 mb-2" />
                   <span className="font-mono text-[10px] uppercase tracking-widest">
@@ -261,9 +314,8 @@ export default function DashboardPage() {
                     const itemId = item._id || item.id;
                     const isFolder =
                       item.isFolder ||
-                      item.itemType === 'Folder' ||
+                      item.itemType === 'folder' ||
                       (!item.fileUrl && !item.key);
-                    // Updated Loading Check
                     const isDeleting =
                       (fileDelete.isPending &&
                         fileDelete.variables === itemId) ||
@@ -311,10 +363,10 @@ export default function DashboardPage() {
                                   className="bg-black border border-sky-500/40 outline-none text-xs text-white px-2 py-1 rounded-md w-full max-w-[250px] font-mono"
                                   value={editValue}
                                   onChange={(e) => setEditValue(e.target.value)}
-                                  onKeyDown={(e) => {
-                                    if (e.key === 'Enter')
-                                      handleSaveName(itemId, !!item.isDraft);
-                                  }}
+                                  onKeyDown={(e) =>
+                                    e.key === 'Enter' &&
+                                    handleSaveName(itemId, !!item.isDraft)
+                                  }
                                 />
                                 <button
                                   onClick={() =>
@@ -329,9 +381,16 @@ export default function DashboardPage() {
                               </div>
                             ) : (
                               <>
-                                <p className="text-xs font-light text-slate-200 truncate tracking-wide">
-                                  {resolveItemName(item)}
-                                </p>
+                                <div className="flex items-center gap-2">
+                                  <p className="text-xs font-light text-slate-200 truncate tracking-wide">
+                                    {resolveItemName(item)}
+                                  </p>
+                                  {item.isShared && (
+                                    <div className="flex items-center gap-1 bg-sky-500/10 text-sky-400 text-[7px] px-1.5 py-0.5 rounded border border-sky-500/20">
+                                      <Users size={8} /> SHARED
+                                    </div>
+                                  )}
+                                </div>
                                 <span className="text-[7px] font-mono text-slate-600 uppercase tracking-widest">
                                   {isFolder ? 'DIRECTORY_NODE' : 'ASSET_DATA'}
                                 </span>
@@ -362,7 +421,7 @@ export default function DashboardPage() {
                                   onClick={() => setActiveMenu(null)}
                                 />
                                 <div className="absolute right-0 mt-2 w-44 bg-[#0c0c0c] border border-white/10 rounded-xl p-1 shadow-2xl z-50 backdrop-blur-xl">
-                                  {item.fileUrl && (
+                                  {(item.fileUrl || item.key) && (
                                     <button
                                       onClick={() =>
                                         window.open(item.fileUrl, '_blank')
@@ -378,23 +437,41 @@ export default function DashboardPage() {
                                   >
                                     <Download size={12} /> Download
                                   </button>
-                                  <button
-                                    onClick={() => {
-                                      setEditingId(itemId);
-                                      setEditValue(resolveItemName(item));
-                                      setActiveMenu(null);
-                                    }}
-                                    className="w-full flex items-center gap-2 px-3 py-2 text-[10px] hover:bg-white/5 rounded-lg font-mono uppercase"
-                                  >
-                                    <Edit3 size={12} /> Rename
-                                  </button>
-                                  <div className="h-px bg-white/5 my-1" />
-                                  <button
-                                    onClick={(e) => handleDelete(e, item)}
-                                    className="w-full flex items-center gap-2 px-3 py-2 text-[10px] hover:bg-rose-500/10 text-rose-500 rounded-lg font-mono uppercase"
-                                  >
-                                    <Trash2 size={12} /> Delete
-                                  </button>
+
+                                  {!item.isShared && (
+                                    <>
+                                      <button
+                                        onClick={() => {
+                                          setShareTarget({
+                                            id: itemId,
+                                            name: resolveItemName(item),
+                                            type: isFolder ? 'folder' : 'file',
+                                          });
+                                          setActiveMenu(null);
+                                        }}
+                                        className="w-full flex items-center gap-2 px-3 py-2 text-[10px] hover:bg-white/5 rounded-lg font-mono uppercase"
+                                      >
+                                        <Share2 size={12} /> Share
+                                      </button>
+                                      <button
+                                        onClick={() => {
+                                          setEditingId(itemId);
+                                          setEditValue(resolveItemName(item));
+                                          setActiveMenu(null);
+                                        }}
+                                        className="w-full flex items-center gap-2 px-3 py-2 text-[10px] hover:bg-white/5 rounded-lg font-mono uppercase"
+                                      >
+                                        <Edit3 size={12} /> Rename
+                                      </button>
+                                      <div className="h-px bg-white/5 my-1" />
+                                      <button
+                                        onClick={(e) => handleDelete(e, item)}
+                                        className="w-full flex items-center gap-2 px-3 py-2 text-[10px] hover:bg-rose-500/10 text-rose-500 rounded-lg font-mono uppercase"
+                                      >
+                                        <Trash2 size={12} /> Delete
+                                      </button>
+                                    </>
+                                  )}
                                 </div>
                               </>
                             )}
@@ -409,6 +486,16 @@ export default function DashboardPage() {
           </motion.div>
         </section>
       </main>
+
+      {shareTarget && (
+        <ShareDialog
+          isOpen={!!shareTarget}
+          onClose={() => setShareTarget(null)}
+          itemId={shareTarget.id}
+          itemName={shareTarget.name}
+          itemType={shareTarget.type}
+        />
+      )}
     </div>
   );
 }

@@ -49,6 +49,12 @@ export default function Navbar() {
               </span>
               <div className="h-1 w-1 rounded-full bg-sky-500 opacity-0 group-hover:opacity-100 transition-all" />
             </Link>
+            <Link to="/shared" className="group flex items-center gap-2">
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500 group-hover:text-white transition-colors">
+                Shared
+              </span>
+              <div className="h-1 w-1 rounded-full bg-violet-500 opacity-0 group-hover:opacity-100 transition-all" />
+            </Link>
             <Link to="/" className="group flex items-center gap-2">
               <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500 group-hover:text-white transition-colors">
                 About

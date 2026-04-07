@@ -9,7 +9,7 @@ const envSchema = z.object({
     .enum(['development', 'staging', 'production'])
     .default('development'),
 
-  BASE_BACKEND_URL: z.string(),
+  VITE_BASE_BACKEND_URL: z.string(),
 
   // Application
   ALLOWED_ORIGINS: z

@@ -6,8 +6,8 @@ const getGithubURL = async () => {
   const githubURL = 'https://github.com/login/oauth/authorize';
 
   const params = new URLSearchParams({
-    client_id: env.GITHUB_CLIENT_ID,
-    redirect_uri: env.GITHUB_REDIRECT_URI,
+    client_id: env!.GITHUB_CLIENT_ID,
+    redirect_uri: env!.GITHUB_REDIRECT_URI,
     scope: 'user:email',
   }).toString();
   return `${githubURL}?${params}`;
@@ -17,17 +17,16 @@ const signinwithGithub = async (code: string) => {
   const tokenResponse = await axios.post(
     'https://github.com/login/oauth/access_token',
     {
-      client_id: env.GITHUB_CLIENT_ID,
-      client_secret: env.GITHUB_CLIENT_SECRET,
+      client_id: env!.GITHUB_CLIENT_ID,
+      client_secret: env!.GITHUB_CLIENT_SECRET,
       code,
-      redirect_uri: env.GITHUB_REDIRECT_URI,
+      redirect_uri: env!.GITHUB_REDIRECT_URI,
     },
     {
       headers: { Accept: 'application/json' },
     },
   );
   const access_token = tokenResponse.data.access_token;
-  // logger("INFO","Access Token: ",access_token)
   const userResponse = await axios.get(`http://api.github.com/user`, {
     headers: { Authorization: `Bearer ${access_token}` },
   });
@@ -37,17 +36,14 @@ const signinwithGithub = async (code: string) => {
   const emailResponse = await axios.get('https://api.github.com/user/emails', {
     headers: {
       Authorization: `Bearer ${access_token}`,
-      'User-Agent': 'Stripe-App', // Put -App always after the App name
+      'User-Agent': 'Stripe-App',
     },
   });
-
-  // logger("INFO","Email Response",emailResponse);
 
   const email = emailResponse.data.find(
     (email: any) => email.primary && email.verified,
   ).email;
 
-  // Access Token is not of authorization Purpose here, use here because accessToken use is primarly for
   const userData = {
     name: user.name,
     email: email,
@@ -62,8 +58,8 @@ const signinwithGithub = async (code: string) => {
 const getGoogleURL = async () => {
   const rootURL = 'https://accounts.google.com/o/oauth2/v2/auth';
   const options = new URLSearchParams({
-    redirect_uri: env.GOOGLE_REDIRECT_URI,
-    client_id: env.GOOGLE_CLIENT_ID,
+    redirect_uri: env!.GOOGLE_REDIRECT_URI,
+    client_id: env!.GOOGLE_CLIENT_ID,
     access_type: 'offline',
     response_type: 'code',
     prompt: 'consent',
@@ -81,9 +77,9 @@ const signinwithGoogle = async (code: string) => {
     'https://oauth2.googleapis.com/token',
     {
       code,
-      client_id: env.GOOGLE_CLIENT_ID,
-      client_secret: env.GOOGLE_CLIENT_SECRET,
-      redirect_uri: env.GOOGLE_REDIRECT_URI,
+      client_id: env!.GOOGLE_CLIENT_ID,
+      client_secret: env!.GOOGLE_CLIENT_SECRET,
+      redirect_uri: env!.GOOGLE_REDIRECT_URI,
       grant_type: 'authorization_code',
     },
     {
@@ -93,7 +89,6 @@ const signinwithGoogle = async (code: string) => {
     },
   );
   const token = tokenResponse.data;
-  //    logger("INFO","token object",token)
 
   const userResponse = await axios.get(
     'https://www.googleapis.com/oauth2/v2/userinfo',

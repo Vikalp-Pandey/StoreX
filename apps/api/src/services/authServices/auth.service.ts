@@ -21,6 +21,7 @@ export const signJwt = async (
 
 export const verifyJwt = async (token: string, jwt_secret: string) => {
   const decoded = jwt.verify(token, jwt_secret);
+  console.log(decoded);
   if (decoded) {
     return { decoded, expired: false };
   }
@@ -34,10 +35,10 @@ export const findandreissueToken = async (email: string) => {
   if (!accessToken && user) {
     const token = await signJwt(
       { id: user?._id.toString() },
-      env.ACCESS_SECRET,
-      { expiresIn: env.ACCESS_SECRET_TTL },
+      env!.ACCESS_SECRET,
+      { expiresIn: env!.ACCESS_SECRET_TTL },
     );
-    logger('INFO', 'Access_Ttl:', env.ACCESS_SECRET_TTL);
+    logger('INFO', 'Access_Ttl:', env!.ACCESS_SECRET_TTL);
     user.access_token = token;
     await user.save();
     return user.access_token;
@@ -46,7 +47,7 @@ export const findandreissueToken = async (email: string) => {
   return accessToken;
 };
 export const extractUser = async (token: string) => {
-  const decoded = await verifyJwt(token, env.ACCESS_SECRET);
+  const decoded = await verifyJwt(token, env!.ACCESS_SECRET);
   if (!decoded.decoded || typeof decoded.decoded == 'string') {
     return;
   }
@@ -86,7 +87,7 @@ export const deleteOtp = async (otp: verifyUserDocument) => {
 
 export const generateResetTokenandLink = () => {
   const token = crypto.randomBytes(32).toString('hex');
-  const resetLink = `${env.ALLOWED_ORIGINS}/reset-password?token=${token}`;
+  const resetLink = `${env!.ALLOWED_ORIGINS}/reset-password?token=${token}`;
   return { token, resetLink };
 };
 
@@ -104,7 +105,6 @@ export const validateToken = async (token: string) => {
 
 export const saveResetToken = async (userId: string, token: string) => {
   try {
-    // This keeps the DB logic out of the controller
     const savedRecord = await ResetPassword.create({
       userId,
       token,

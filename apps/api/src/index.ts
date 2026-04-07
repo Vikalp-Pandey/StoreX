@@ -6,6 +6,7 @@ import { logger } from '@packages/httputils';
 import authRoutes from '@/routes/authRoutes/auth.routes';
 import oauthRoutes from '@/routes/authRoutes/oauth.routes';
 import fileRoutes from '@/routes/fileuploadRoutes/fileupload.routes';
+import shareRoutes from '@/routes/fileuploadRoutes/share.routes';
 import { errorHandler } from '@/middlewares/error.middleware';
 import env from '@packages/env';
 import cors from 'cors';
@@ -13,14 +14,14 @@ import { validateUser } from './middlewares/user.middleware';
 
 const app = express();
 
-const PORT = env.PORT;
+const PORT = env!.PORT;
 
 app.get('/', (_req: Request, res: Response) => {
   res.json({ message: 'Storex Backend is running!' });
 });
 app.use(
   cors({
-    origin: env.ALLOWED_ORIGINS, // Your frontend URL
+    origin: env!.ALLOWED_ORIGINS, // Your frontend URL
     credentials: true, // Allow cookies to be sent
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
@@ -31,9 +32,10 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/auth', oauthRoutes);
 app.use('/api/files', validateUser, fileRoutes);
+app.use('/api/files', validateUser, shareRoutes);
 
 app.use(errorHandler);
-connectToMongoDb(env.DATABASE_URL);
+connectToMongoDb(env!.DATABASE_URL);
 
 app.listen(PORT, () => {
   logger('INFO', `Server is running on http://localhost:${PORT}`);

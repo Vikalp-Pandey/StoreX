@@ -16,18 +16,18 @@ import authService from '@/services/authServices/auth.service';
 import { VerificationType } from '@/models/authModels/verifyUser.model';
 
 const cookieConfig = {
-  isSecure: env.NODE_ENV === 'production',
-  sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
+  isSecure: env!.NODE_ENV === 'production',
+  sameSite: env!.NODE_ENV === 'production' ? 'none' : 'lax',
 } as CookieConfig;
 
 const emailService = new EmailService(
-  env.SMTP_NAME,
-  env.SMTP_MAIL,
-  env.SMTP_REPLY_TO,
-  env.SMTP_HOST,
-  env.SMTP_PORT,
-  env.SMTP_USERNAME,
-  env.SMTP_PASSWORD,
+  env!.SMTP_NAME,
+  env!.SMTP_MAIL,
+  env!.SMTP_REPLY_TO,
+  env!.SMTP_HOST,
+  env!.SMTP_PORT,
+  env!.SMTP_USERNAME,
+  env!.SMTP_PASSWORD,
 );
 
 const setAccessTokenCookie = (
@@ -196,8 +196,8 @@ export const verifyOTP = asyncHandler(async (req: Request, res: Response) => {
 
     const accessToken = await jwtService.signJwt(
       { id: isExisting._id.toString() },
-      env.ACCESS_SECRET,
-      { expiresIn: env.ACCESS_SECRET_TTL },
+      env!.ACCESS_SECRET,
+      { expiresIn: env!.ACCESS_SECRET_TTL },
     );
 
     isExisting.access_token = accessToken;

@@ -1,4 +1,3 @@
-// @/hooks/useFileUpload.ts
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   getItems,
@@ -6,7 +5,7 @@ import {
   saveFolders,
   deleteFolder,
   deleteFile,
-} from '@/api/fileupload.api'; // Adjust path
+} from '@/api/fileupload.api';
 import { toast } from 'react-toastify';
 
 export const useFiles = (parentFolder: string | null) => {
@@ -75,8 +74,6 @@ export const useFiles = (parentFolder: string | null) => {
       queryClient.invalidateQueries({
         queryKey: ['files', parentFolder ?? 'root'],
       });
-
-      // If folders can be nested, it's safer to invalidate the whole 'files' prefix
     },
     onError: (err: any) => {
       console.log(err);

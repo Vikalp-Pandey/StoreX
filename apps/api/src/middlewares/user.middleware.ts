@@ -1,10 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import {
-  asyncHandler,
-  logger,
-  sendRedirect,
-  sendResponse,
-} from '@packages/httputils';
+import { asyncHandler, sendResponse } from '@packages/httputils';
 import { verifyJwt } from '@/services/authServices/auth.service';
 import env from '@packages/env';
 import userService from '@/services/authServices/user.service';
@@ -29,7 +24,7 @@ export const validateUser = asyncHandler(
     if (!token) {
       return sendResponse(res, 401, 'Unauthorized User');
     }
-    const decoded = await verifyJwt(token, env.ACCESS_SECRET);
+    const decoded = await verifyJwt(token, env!.ACCESS_SECRET);
 
     if (!decoded || !decoded.decoded) {
       return sendResponse(res, 401, 'Invalid Token');

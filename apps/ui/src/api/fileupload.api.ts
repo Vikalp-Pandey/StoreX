@@ -115,17 +115,14 @@ export const downloadFileBlob = async (url: string, fileName: string) => {
 
     const link = document.createElement('a');
     link.href = blobUrl;
-    link.download = fileName; // This is the magic line for the "Save As" behavior
-
+    link.download = fileName;
     document.body.appendChild(link);
     link.click();
-
-    // Cleanup
     document.body.removeChild(link);
     window.URL.revokeObjectURL(blobUrl);
   } catch (error) {
     console.error('Download failed:', error);
-    throw error; // Re-throw so the dashboard toast can catch it
+    throw error;
   }
 };
 

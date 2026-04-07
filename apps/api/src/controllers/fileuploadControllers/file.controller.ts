@@ -4,6 +4,7 @@ import { generateUploadUrl, S3 } from '@services/fileupload';
 import { Request, Response } from 'express';
 import Files from '@/models/fileModels/file.model';
 import Folders from '@/models/fileModels/folder.model';
+import sharedItem from '@/models/fileModels/sharedItem.model';
 import commonService from '@/services/common.service';
 import fileService from '@/services/fileServices/file.service';
 import { DeleteObjectCommand } from '@aws-sdk/client-s3';
@@ -16,10 +17,10 @@ export const fileUpload = asyncHandler(async (req: Request, res: Response) => {
   const uniqueFileName = fileName + userId + parentFolder;
 
   const uploadUrlObject = await generateUploadUrl(uniqueFileName, fileType, {
-    bucket_name: env.BUCKET_NAME,
-    region: env.AWS_REGION,
-    accessKeyId: env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
+    bucket_name: env!.BUCKET_NAME,
+    region: env!.AWS_REGION,
+    accessKeyId: env!.AWS_ACCESS_KEY_ID,
+    secretAccessKey: env!.AWS_SECRET_ACCESS_KEY,
   });
 
   return sendResponse(res, 200, 'Temp Url for file', uploadUrlObject);
@@ -40,12 +41,13 @@ export const saveFiles = asyncHandler(async (req: Request, res: Response) => {
   if (!key.startsWith('uploads/')) {
     return sendResponse(res, 400, 'Invalid key');
   }
-  const isExisting = await commonService.findInstance(
-    Files,
-    'itemName',
-    itemName,
-  );
+  // const isExisting = await commonService.findInstance(
+  //   Files,
+  //   'itemName',
+  //   itemName,
+  // );
 
+  const isExisting = await Files.find({ key, userId });
   // isExisting uses find inside which returns an array, therefore [] also means truthy, so we have to check it with length.
 
   if (isExisting.length > 0) {
@@ -90,7 +92,6 @@ export const saveFolders = asyncHandler(async (req: Request, res: Response) => {
   return sendResponse(res, 200, 'Folder saved successfully', folder);
 });
 
-// Get Root Items from  Db
 export const getItems = asyncHandler(async (req: Request, res: Response) => {
   const { parentFolder } = req.query;
 
@@ -103,12 +104,24 @@ export const getItems = asyncHandler(async (req: Request, res: Response) => {
   if (parentFolder && typeof parentFolder !== 'string') {
     return sendResponse(res, 403, 'Invalid parentFolder');
   }
-  const filter = {
-    userId,
+
+  let filter: any = {
     parentFolder: parentFolder || null,
   };
 
-  // 2. Fetch both Files and Folders in parallel for better performance
+  if (parentFolder) {
+    const ownsFolder = await Folders.findOne({ _id: parentFolder, userId });
+    const hasSharedAccess = await sharedItem.findOne({
+      folderId: parentFolder,
+      userId,
+    });
+
+    if (!ownsFolder && !hasSharedAccess) {
+      return sendResponse(res, 403, 'Access denied to this folder');
+    }
+  } else {
+    filter.userId = userId;
+  }
   const [files, folders] = await Promise.all([
     Files.find(filter).sort({ createdAt: -1 }).lean(),
     Folders.find(filter).sort({ createdAt: -1 }).lean(),
@@ -136,34 +149,38 @@ export const deleteFile = asyncHandler(async (req: Request, res: Response) => {
 
   await s3Client.send(
     new DeleteObjectCommand({
-      Bucket: env.BUCKET_NAME,
+      Bucket: env!.BUCKET_NAME,
       Key: file.key,
     }),
   );
 
   await Files.deleteOne({ _id: fileId });
 
+  await sharedItem.deleteMany({ fileId: fileId as string });
+
   return sendResponse(res, 200, `${file.itemName} deleted successfully`);
 });
 
 export const deleteFolder = asyncHandler(
   async (req: Request, res: Response) => {
-    const { folderId } = req.query; // parentFolderId usually isn't needed for the target folder
+    const { folderId } = req.query;
     const userId = req.user?.id;
 
     if (!userId) {
       return sendResponse(res, 404, 'User not Authenticated');
     }
 
-    const folder = await commonService.findObject(Folders, { _id: folderId });
+    const folder = await commonService.findObject(Folders, {
+      _id: folderId,
+      userId,
+    });
 
     if (!folder) {
-      return sendResponse(res, 404, 'Folder not found');
+      return sendResponse(res, 404, 'Folder not found or access denied');
     }
 
     const s3Client = await S3();
 
-    // Start the recursive deletion
     await fileService.deleteFolderRecursive(folderId as string, s3Client);
 
     return sendResponse(

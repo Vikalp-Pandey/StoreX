@@ -20,6 +20,7 @@ StoreX is a modern, high-performance file storage and management platform built 
 ## 🛠️ Tech Stack
 
 ### Frontend (`apps/ui`)
+
 - **Framework**: [React 19](https://react.dev/) + [Vite](https://vitejs.dev/)
 - **Styling**: [Tailwind CSS 4](https://tailwindcss.com/) + [Shadcn UI](https://ui.shadcn.com/)
 - **State Management**: [TanStack Query (v5)](https://tanstack.com/query/latest)
@@ -28,6 +29,7 @@ StoreX is a modern, high-performance file storage and management platform built 
 - **Icons**: [Lucide React](https://lucide.dev/)
 
 ### Backend (`apps/api`)
+
 - **Runtime**: [Node.js](https://nodejs.org/) + [TypeScript](https://www.typescriptlang.org/)
 - **Framework**: [Express](https://expressjs.com/)
 - **Database**: [MongoDB](https://www.mongodb.com/) via [Mongoose](https://mongoosejs.com/)
@@ -35,6 +37,7 @@ StoreX is a modern, high-performance file storage and management platform built 
 - **Security**: [Passport](http://www.passportjs.org/), [Speakeasy](https://github.com/speakeasyjs/speakeasy), [JsonWebToken](https://github.com/auth0/node-jsonwebtoken)
 
 ### Infrastructure & Tooling
+
 - **Monorepo**: [Turborepo](https://turbo.build/)
 - **Package Manager**: [pnpm](https://pnpm.io/)
 - **Shared Packages**: Environment management & HTTP utilities.
@@ -63,6 +66,7 @@ StoreX/
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Node.js (Latest LTS)
 - pnpm (`npm install -g pnpm`)
 - MongoDB (Local or Atlas)
@@ -71,12 +75,14 @@ StoreX/
 ### Installation
 
 1. **Clone the repository:**
+
    ```bash
    git clone https://github.com/your-username/storex.git
    cd storex
    ```
 
 2. **Install dependencies:**
+
    ```bash
    pnpm install
    ```

@@ -8,10 +8,10 @@ import env from '@packages/env';
 
 export const S3 = async () => {
   const s3Client = new S3Client({
-    region: env.AWS_REGION,
+    region: env!.AWS_REGION,
     credentials: {
-      accessKeyId: env.AWS_ACCESS_KEY_ID,
-      secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
+      accessKeyId: env!.AWS_ACCESS_KEY_ID,
+      secretAccessKey: env!.AWS_SECRET_ACCESS_KEY,
     },
   });
   return s3Client;
@@ -34,7 +34,7 @@ export const generateUploadUrl = async (
   { bucket_name, region, accessKeyId, secretAccessKey }: AwsS3Credentials,
 ) => {
   const cleanFileName = fileName.replace(/[^\w.-]/g, '');
-  // Path where uploaded file gets stored in S3 bucket
+
   const uniqueKey = `uploads/${cleanFileName}`;
 
   // ^ PutObjectCommand :"I want to upload a file into the bucket."

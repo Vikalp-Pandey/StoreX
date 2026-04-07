@@ -1,5 +1,4 @@
 import { api } from '@/lib/axios';
-import { LogIn } from 'lucide-react';
 import { z } from 'zod';
 
 export const signinSchema = z.object({

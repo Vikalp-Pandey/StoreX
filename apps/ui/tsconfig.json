@@ -5,6 +5,7 @@
     "baseUrl": ".",
     "forceConsistentCasingInFileNames":true,
     "strict": true,
+    "types": ["vite/client"],
     "paths": {
       "@/*": ["./src/*"]
     }

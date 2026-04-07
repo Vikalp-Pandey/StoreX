@@ -14,8 +14,8 @@ import userService from '@/services/authServices/user.service';
 import { Request, Response, NextFunction } from 'express';
 
 const cookieConfig = {
-  isSecure: env.NODE_ENV === 'production',
-  sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
+  isSecure: env!.NODE_ENV === 'production',
+  sameSite: env!.NODE_ENV === 'production' ? 'none' : 'lax',
 } as CookieConfig;
 
 const handleAuthResponse = (
@@ -24,7 +24,7 @@ const handleAuthResponse = (
   token: string | undefined,
   frontendState: string,
 ) => {
-  const isProduction = env.NODE_ENV === 'production';
+  const isProduction = env!.NODE_ENV === 'production';
 
   if (isProduction) {
     return sendResponse(res, 200, 'Authentication Successful', {
@@ -36,7 +36,7 @@ const handleAuthResponse = (
   }
   return sendRedirect(
     res,
-    `${env.ALLOWED_ORIGINS}/dashboard?state=${frontendState}`,
+    `${env!.ALLOWED_ORIGINS}/dashboard?state=${frontendState}`,
   );
 };
 
@@ -51,7 +51,7 @@ export const getGithubURL = asyncHandler(
 export const signinwithGithub = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const { code } = req.query;
-    const isProduction = env.NODE_ENV === 'production';
+    const isProduction = env!.NODE_ENV === 'production';
     if (typeof code !== 'string') {
       return sendResponse(res, 400, 'Invalid Code Type', { code: typeof code });
     }
@@ -70,7 +70,7 @@ export const signinwithGithub = asyncHandler(
       // Sign a temporary JWT containing username/email for frontend avatar
       const frontendState = await jwtService.signJwt(
         { name: isExisting.name, email: isExisting.email },
-        env.ACCESS_SECRET,
+        env!.ACCESS_SECRET,
         { expiresIn: '10m' },
       );
       const token = await jwtService.findandreissueToken(isExisting.email);
@@ -92,7 +92,7 @@ export const signinwithGithub = asyncHandler(
     // Create JWT token for authentication
     const token = await jwtService.signJwt(
       { id: newUser._id },
-      env.ACCESS_SECRET,
+      env!.ACCESS_SECRET,
       { expiresIn: '7d' },
     );
     newUser.access_token = token;
@@ -104,7 +104,7 @@ export const signinwithGithub = asyncHandler(
     // Create state JWT with username/email for frontend (avatar letter)
     const frontendState = await jwtService.signJwt(
       { name: newUser.name, email: newUser.email },
-      env.ACCESS_SECRET,
+      env!.ACCESS_SECRET,
       { expiresIn: '10m' },
     );
 
@@ -127,7 +127,7 @@ export const getGoogleURL = async (
 export const signinwithGoogle = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const { code } = req.query;
-    const isProduction = env.NODE_ENV === 'production';
+    const isProduction = env!.NODE_ENV === 'production';
 
     if (typeof code !== 'string') {
       return sendResponse(res, 400, 'Invalid Code Type', { code: typeof code });
@@ -144,14 +144,12 @@ export const signinwithGoogle = asyncHandler(
     if (isExisting) {
       // logger('INFO', 'User with this email exists. Logging in...');
 
-      // Sign a temporary JWT for frontend state (UI/Avatar)
       const frontendState = await jwtService.signJwt(
         { name: isExisting.name, email: isExisting.email },
-        env.ACCESS_SECRET,
+        env!.ACCESS_SECRET,
         { expiresIn: '10m' },
       );
 
-      // Reissue existing access token
       const token = await jwtService.findandreissueToken(isExisting.email);
       // logger('INFO', 'Reissued Access Token:', token);
 
@@ -172,7 +170,7 @@ export const signinwithGoogle = asyncHandler(
     // Create new 7-day Access Token
     const token = await jwtService.signJwt(
       { id: newUser._id },
-      env.ACCESS_SECRET,
+      env!.ACCESS_SECRET,
       { expiresIn: '7d' },
     );
 
@@ -189,7 +187,7 @@ export const signinwithGoogle = asyncHandler(
     // Create frontend state JWT
     const frontendState = await jwtService.signJwt(
       { name: newUser.name, email: newUser.email },
-      env.ACCESS_SECRET,
+      env!.ACCESS_SECRET,
       { expiresIn: '10m' },
     );
 

@@ -14,7 +14,6 @@ export const errorHandler = (
   }
 
   const error = err.name;
-  // fallback for unknown errors
   return res.status(500).json({
     success: false,
     error: { stack: err.stack, message: err.message },

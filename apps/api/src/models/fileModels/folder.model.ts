@@ -1,6 +1,5 @@
 import mongoose, { model, Document, Schema } from 'mongoose';
 
-// This interface can also be used for typecasting in services
 export interface FolderSchema {
   userId: string;
   name: string;
