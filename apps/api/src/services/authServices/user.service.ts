@@ -8,8 +8,8 @@ export const createUser = async (user: userSchema) => {
     newUser.save();
     return newUser;
   }
-  const token = await jwtService.findandreissueToken(isExisting.email);
-  isExisting.access_token = token;
+  const token = await jwtService.findandreissueToken(isExisting!.email);
+  isExisting!.access_token = token!;
   return isExisting;
 };
 

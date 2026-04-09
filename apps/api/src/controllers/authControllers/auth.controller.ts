@@ -221,7 +221,7 @@ export const verifyOTP = asyncHandler(async (req: Request, res: Response) => {
     const user = await userService.findUser({ email });
 
     if (!user) {
-      logger('ERROR', 'User not found for signin OTP:', email);
+      // logger('ERROR', 'User not found for signin OTP:', email);
       return sendResponse(res, 404, 'User not found');
     }
 

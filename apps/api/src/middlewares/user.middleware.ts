@@ -21,20 +21,19 @@ interface MyJwtPayload {
 export const validateUser = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const token = req.cookies?.accessToken;
+
     if (!token) {
       return sendResponse(res, 401, 'Unauthorized User');
     }
-    const decoded = await verifyJwt(token, env!.ACCESS_SECRET);
+    const decoded = await verifyJwt(token, env.ACCESS_SECRET);
 
+    console.log(env.ACCESS_SECRET)
     if (!decoded || !decoded.decoded) {
       return sendResponse(res, 401, 'Invalid Token');
     }
 
     const payload = decoded.decoded as MyJwtPayload;
     const userId = payload.id;
-
-    // logger('INFO', 'User ID extracted', userId);
-
     const existingUser = await userService.findUser({ id: userId });
 
     if (!existingUser) {
@@ -45,3 +44,6 @@ export const validateUser = asyncHandler(
     return next();
   },
 );
+
+
+

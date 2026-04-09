@@ -1,8 +1,13 @@
 import axios from 'axios';
+import env from '@packages/env/client';
 
-const baseURL = (import.meta as any).env.VITE_BASE_BACKEND_URL;
-
+const baseURL = env.VITE_BASE_BACKEND_URL;
+console.log(baseURL);
 export const api = axios.create({
-  baseURL: 'http://localhost:3000/api',
+  // baseURL: 'http://localhost:3000/api',
+  baseURL,
   withCredentials: true,
 });
+
+
+

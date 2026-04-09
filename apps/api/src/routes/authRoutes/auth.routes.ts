@@ -20,3 +20,7 @@ router.post('/forgot-password', validateUser, jwtAuthController.forgotPassword);
 router.post('/reset-password', validateUser, jwtAuthController.resetPassword);
 
 export default router;
+
+
+
+

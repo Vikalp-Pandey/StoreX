@@ -51,7 +51,6 @@ export const getGithubURL = asyncHandler(
 export const signinwithGithub = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const { code } = req.query;
-    const isProduction = env!.NODE_ENV === 'production';
     if (typeof code !== 'string') {
       return sendResponse(res, 400, 'Invalid Code Type', { code: typeof code });
     }
@@ -70,7 +69,7 @@ export const signinwithGithub = asyncHandler(
       // Sign a temporary JWT containing username/email for frontend avatar
       const frontendState = await jwtService.signJwt(
         { name: isExisting.name, email: isExisting.email },
-        env!.ACCESS_SECRET,
+        env.ACCESS_SECRET,
         { expiresIn: '10m' },
       );
       const token = await jwtService.findandreissueToken(isExisting.email);
@@ -104,7 +103,7 @@ export const signinwithGithub = asyncHandler(
     // Create state JWT with username/email for frontend (avatar letter)
     const frontendState = await jwtService.signJwt(
       { name: newUser.name, email: newUser.email },
-      env!.ACCESS_SECRET,
+      env.ACCESS_SECRET,
       { expiresIn: '10m' },
     );
 
@@ -127,17 +126,15 @@ export const getGoogleURL = async (
 export const signinwithGoogle = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const { code } = req.query;
-    const isProduction = env!.NODE_ENV === 'production';
+    const isProduction = env.NODE_ENV === 'production';
 
     if (typeof code !== 'string') {
       return sendResponse(res, 400, 'Invalid Code Type', { code: typeof code });
     }
 
-    // 1. Exchange code for Google user info
     const googleUser = await oauthService.signinwithGoogle(code);
     // logger('INFO', 'Google User Info', googleUser);
 
-    // 2. Check if user already exists
     let isExisting = await userService.findUser({ email: googleUser.email });
     // logger('INFO', 'Checking for existing user:', isExisting);
 
@@ -164,13 +161,12 @@ export const signinwithGoogle = asyncHandler(
       return handleAuthResponse(res, isExisting, token, frontendState);
     }
 
-    // 3. If user doesn't exist, create a new one
     let newUser = await userService.createUser(googleUser);
 
-    // Create new 7-day Access Token
+
     const token = await jwtService.signJwt(
       { id: newUser._id },
-      env!.ACCESS_SECRET,
+      env.ACCESS_SECRET,
       { expiresIn: '7d' },
     );
 
@@ -181,18 +177,14 @@ export const signinwithGoogle = asyncHandler(
       maxAge: 1000 * 60 * 60,
     });
 
-    // Manually set cookie in request object if needed for immediate middleware
     req.cookies.accessToken = token;
 
-    // Create frontend state JWT
     const frontendState = await jwtService.signJwt(
       { name: newUser.name, email: newUser.email },
-      env!.ACCESS_SECRET,
+      env.ACCESS_SECRET,
       { expiresIn: '10m' },
     );
-
     // logger('INFO', 'Frontend State for New User', frontendState);
-
     return handleAuthResponse(res, newUser, token, frontendState);
   },
 );

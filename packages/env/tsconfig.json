@@ -1,5 +1,7 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "ignoreDeprecations": "6.0",
     "module": "ESNext",         // Allows import.meta
     "moduleResolution": "Bundler", // Optimized for Vite/Modern Node
     "target": "ESNext",
@@ -7,6 +9,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "strict": true
-  }
+    "strict": true,
+    "composite": true
+  },
 }

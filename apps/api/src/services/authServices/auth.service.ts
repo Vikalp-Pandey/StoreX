@@ -20,31 +20,43 @@ export const signJwt = async (
 };
 
 export const verifyJwt = async (token: string, jwt_secret: string) => {
-  const decoded = jwt.verify(token, jwt_secret);
-  console.log(decoded);
-  if (decoded) {
+  try {
+    const decoded = jwt.verify(token, jwt_secret);
     return { decoded, expired: false };
+  } catch (error: any) {
+    logger('ERROR', 'JWT verification failed:', error.message);
+    return {
+      decoded: null,
+      expired: error.name === 'TokenExpiredError',
+    };
   }
-  return { decoded: null, expired: true };
 };
 
 export const findandreissueToken = async (email: string) => {
   const user = await User.findOne({ email: email });
-  const accessToken = user?.access_token;
+  if (!user) return null;
 
-  if (!accessToken && user) {
-    const token = await signJwt(
-      { id: user?._id.toString() },
-      env!.ACCESS_SECRET,
-      { expiresIn: env!.ACCESS_SECRET_TTL },
-    );
-    logger('INFO', 'Access_Ttl:', env!.ACCESS_SECRET_TTL);
-    user.access_token = token;
-    await user.save();
-    return user.access_token;
+  // Verify the existing token before reusing it
+  if (user.access_token) {
+    try {
+      jwt.verify(user.access_token, env!.ACCESS_SECRET);
+      return user.access_token; // Still valid, reuse it
+    } catch {
+      // Token is invalid/expired (e.g. secret changed), fall through to reissue
+      logger('INFO', 'Existing token invalid, reissuing for:', email);
+    }
   }
 
-  return accessToken;
+  // Issue a fresh token
+  const token = await signJwt(
+    { id: user._id.toString() },
+    env!.ACCESS_SECRET,
+    { expiresIn: env!.ACCESS_SECRET_TTL },
+  );
+  logger('INFO', 'Access_Ttl:', env!.ACCESS_SECRET_TTL);
+  user.access_token = token;
+  await user.save();
+  return user.access_token;
 };
 export const extractUser = async (token: string) => {
   const decoded = await verifyJwt(token, env!.ACCESS_SECRET);

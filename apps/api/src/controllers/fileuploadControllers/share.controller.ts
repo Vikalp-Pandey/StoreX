@@ -68,7 +68,7 @@ export const shareItem = asyncHandler(async (req: Request, res: Response) => {
     console.log(error);
   }
 
-  // If a folder is shared, we must ensure all sub-items are shared too
+
   if (folderId) {
     await fileService.shareFolderRecursive(
       folderId,

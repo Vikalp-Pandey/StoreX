@@ -2,19 +2,23 @@
   "name": "@packages/env",
   "version": "1.0.0",
   "description": "",
-  "main":"env.ts",
+  "main": "env.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "exports":{
-    ".":"./env.ts",
-    "./fenv":"./fenv.ts"
+  "exports": {
+    ".": "./env.ts",
+    "./client": "./client.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "packageManager": "pnpm@10.30.3",
   "dependencies": {
-    "@t3-oss/env-core": "^0.13.10"
+    "@repo/utils": "workspace:*",
+    "@t3-oss/env-core": "^0.13.11"
+  },
+  "devDependencies": {
+    "@t3-oss/env-core": "^0.13.11"
   }
 }

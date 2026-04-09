@@ -12,7 +12,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      '@packages/env': path.resolve(__dirname, '../../../../packages/env'),
     },
   },
+   envDir:'../../packages/env'
 });
