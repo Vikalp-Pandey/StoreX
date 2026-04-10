@@ -15,7 +15,6 @@
   "license": "ISC",
   "packageManager": "pnpm@10.30.3",
   "dependencies": {
-    "@repo/utils": "workspace:*",
     "@t3-oss/env-core": "^0.13.11"
   },
   "devDependencies": {
