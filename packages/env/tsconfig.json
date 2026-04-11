@@ -3,7 +3,7 @@
   "compilerOptions": {
     "ignoreDeprecations": "6.0",
     "module": "ESNext",         // Allows import.meta
-    "moduleResolution": "Bundler", // Optimized for Vite/Modern Node
+    "moduleResolution": "bundler", // Optimized for Vite/Modern Node
     "target": "ESNext",
     "lib": ["ESNext", "DOM"],    // DOM allows "window" check to pass
     "esModuleInterop": true,

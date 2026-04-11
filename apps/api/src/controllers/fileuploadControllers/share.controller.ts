@@ -43,7 +43,6 @@ export const shareItem = asyncHandler(async (req: Request, res: Response) => {
       );
   }
 
-
   // This filter prevents the E11000 error by finding the exact combination of user+item
   const shareFilter = {
     userId: recipientId,
@@ -68,7 +67,6 @@ export const shareItem = asyncHandler(async (req: Request, res: Response) => {
     console.log(error);
   }
 
-
   if (folderId) {
     await fileService.shareFolderRecursive(
       folderId,
@@ -78,12 +76,7 @@ export const shareItem = asyncHandler(async (req: Request, res: Response) => {
     );
   }
 
- 
-  return sendResponse(
-    res,
-    200,
-    'Item shared successfully',
-  );
+  return sendResponse(res, 200, 'Item shared successfully');
 });
 
 export const getSharedWithMe = asyncHandler(
@@ -290,3 +283,7 @@ const shareController = {
 };
 
 export default shareController;
+
+
+
+

@@ -163,7 +163,6 @@ export const signinwithGoogle = asyncHandler(
 
     let newUser = await userService.createUser(googleUser);
 
-
     const token = await jwtService.signJwt(
       { id: newUser._id },
       env.ACCESS_SECRET,

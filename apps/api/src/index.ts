@@ -40,3 +40,5 @@ connectToMongoDb(env!.DATABASE_URL);
 app.listen(PORT, () => {
   logger('INFO', `Server is running on http://localhost:${PORT}`);
 });
+
+

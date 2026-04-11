@@ -65,10 +65,8 @@ export default function DashboardPage() {
   };
 
   const filesToRender = useMemo(() => {
-    // 1. Start with personal items
     let combinedList = [...items];
 
-    // 2. Add Shared Items logic
     if (sharedItemsData) {
       if (currentFolderId === null) {
         // At Root level, unwrap the 'item' property
@@ -106,13 +104,11 @@ export default function DashboardPage() {
       }
     }
 
-    // 3. Handle Drafts
     if (draft && draft.parentId === currentFolderId) {
       if (!combinedList.find((i) => (i._id || i.id) === draft.id))
         combinedList = [draft, ...combinedList];
     }
 
-    // 4. Final Search Filter
     return combinedList.filter((item) =>
       resolveItemName(item).toLowerCase().includes(searchQuery.toLowerCase()),
     );

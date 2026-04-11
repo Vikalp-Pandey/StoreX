@@ -14,5 +14,5 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
-   envDir:'../../packages/env'
+  envDir: '../../packages/env',
 });

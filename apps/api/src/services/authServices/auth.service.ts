@@ -48,11 +48,9 @@ export const findandreissueToken = async (email: string) => {
   }
 
   // Issue a fresh token
-  const token = await signJwt(
-    { id: user._id.toString() },
-    env!.ACCESS_SECRET,
-    { expiresIn: env!.ACCESS_SECRET_TTL },
-  );
+  const token = await signJwt({ id: user._id.toString() }, env!.ACCESS_SECRET, {
+    expiresIn: env!.ACCESS_SECRET_TTL,
+  });
   logger('INFO', 'Access_Ttl:', env!.ACCESS_SECRET_TTL);
   user.access_token = token;
   await user.save();

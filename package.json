@@ -3,6 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "description": "Storex Monorepo",
+  "type": "module",
   "scripts": {
     "build": "turbo build",
     "dev": "turbo dev",

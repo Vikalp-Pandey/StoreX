@@ -8,7 +8,7 @@ const env = createEnv({
     VITE_BASE_BACKEND_URL: z.url(),
   },
 
-  runtimeEnv: (import.meta as any).env
+  runtimeEnv: (import.meta as any).env,
 });
 
 export default env;

@@ -27,7 +27,7 @@ export const validateUser = asyncHandler(
     }
     const decoded = await verifyJwt(token, env.ACCESS_SECRET);
 
-    console.log(env.ACCESS_SECRET)
+    console.log(env.ACCESS_SECRET);
     if (!decoded || !decoded.decoded) {
       return sendResponse(res, 401, 'Invalid Token');
     }
@@ -44,6 +44,3 @@ export const validateUser = asyncHandler(
     return next();
   },
 );
-
-
-

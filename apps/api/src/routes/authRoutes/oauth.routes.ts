@@ -9,8 +9,3 @@ router.get('/signin/callback/github', oauthController.signinwithGithub);
 router.get('/google', oauthController.getGoogleURL);
 router.get('/signin/callback/google', oauthController.signinwithGoogle);
 export default router;
-
-
-
-
-
